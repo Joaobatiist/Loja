@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+.main-header {
+    background: linear-gradient(90deg, #1976d2, #2196f3);
+    color: #fff;
+    padding: 15px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between; /* Distribui o logo (esquerda) e o menu (direita) */
+    align-items: center;
+}
+
+.logo {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.logo span {
+    font-weight: 400;
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 30px; /* Adiciona espaçamento entre os links */
+    align-items: center;
+}
+
+.nav-menu a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.05rem;
+    font-weight: 500;
+    padding: 5px 0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-menu a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px;
+    background-color: #ffffff;
+    transition: width 0.3s ease;
+}
+
+.nav-menu a:hover::after {
+    width: 100%;
+}
+
+.login-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+}
+
+.login-link:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.login-icon {
+    font-size: 1.3rem;
+}
+
+.menu-toggle {
+    display: none; /* Escondido por padrão */
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #fff;
+    cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+    .header-content {
+        padding: 0 15px;
+    }
+    .nav-menu {
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: #1976d2;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-20px);
+        transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+        z-index: 1000;
+        gap: 15px;
+    }
+    .nav-menu.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    .nav-menu a {
+        width: 100%;
+        text-align: center;
+        padding: 10px 0;
+        font-size: 1.1rem;
+    }
+    .nav-menu a::after {
+        background-color: #ffffff;
+        height: 1px;
+        bottom: 0;
+    }
+    .login-link {
+        width: fit-content;
+        margin: 10px auto;
+    }
+    .menu-toggle {
+        display: block; /* Visível em telas pequenas */
+    }
+}
