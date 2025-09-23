@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import '../style/loja.css';
-import Logo from '../img/logo.png';
 
 // --- MOCK DE PRODUTOS ---
 const mockProducts = [
-  { id: 1, brand: 'Nike', name: 'Tênis Air Max 90', category: 'Vestuário', image: 'https://via.placeholder.com/300x300.png?text=Air+Max+90', quantity: 1 },
+  { id: 1, brand: 'Nike', name: 'Tênis Air Max 90', category: 'Vestuário', image: '../../public/img/limpeza.jpg', quantity: 1 },
   { id: 2, brand: 'Adidas', name: 'Camiseta Essentials Logo', category: 'Vestuário', image: 'https://via.placeholder.com/300x300.png?text=Camiseta+Adidas', quantity: 1},
   { id: 3, brand: 'Apple', name: 'iPhone 15 Pro', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=iPhone+15', quantity: 1 },
   { id: 4, brand: 'Samsung', name: 'Galaxy Watch 6', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=Galaxy+Watch', quantity: 1},
@@ -25,7 +24,7 @@ function Header({ onToggleCart, cartCount, isMenuOpen, onToggleMenu }) {
             <a href="#sobre" onClick={() => onToggleMenu(false)}>Sobre Nós</a>
             <a href="#contato" onClick={() => onToggleMenu(false)}>Contato</a>
           </nav>
-          <a href="/login" className="login-icon">
+          <a href="/dashboard" className="login-icon">
             <i className="fa-solid fa-user"></i>
           </a>
           <button className="cart-icon" onClick={onToggleCart}>
@@ -210,7 +209,7 @@ function Loja() {
   }, [searchTerm, selectedCategory]);
 
   return (
-    <div className="app">
+    <div className="app loja-container">
       <Header 
         onToggleCart={() => setIsCartOpen(true)} 
         cartCount={cartItems.length} 
@@ -220,7 +219,7 @@ function Loja() {
       <main>
         <section id="produtos" className="section">
           <div className="container">
-            <img src={Logo} alt='logo' className='logo-foto'></img>
+            <img src="/img/logo.png" alt='logo' className='logo-foto'></img>
             <h2 className="section-title">Nossos Produtos</h2>
             
             <div className="filters-bar">
