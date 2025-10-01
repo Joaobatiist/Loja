@@ -15,11 +15,7 @@ import CadastroForm from '../componets/dashboard/CadastroForm'; // importa o for
 import CadastroFuncionario from '../componets/dashboard/CadastroFuncionario';
 
 // Simulação de dados de usuários
-const mockUsuarios = [
-  { id: 1, nome: 'Admin Principal', email: 'admin@limpatech.com', role: 'ADMIN' },
-  { id: 2, nome: 'João Silva', email: 'joao@limpatech.com', role: 'USER' },
-  { id: 3, nome: 'Maria Santos', email: 'maria@limpatech.com', role: 'USER' }
-];
+
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -52,8 +48,7 @@ const Dashboard = () => {
         setUsuarios(response.data);
       }
     } catch (error) {
-      // Em caso de erro, usar dados mock como fallback
-      setUsuarios(mockUsuarios);
+      
     }
   }, [user]);
 
@@ -125,7 +120,7 @@ const Dashboard = () => {
         
         setUser(userData);
         setIsLoggedIn(true);
-        setUsuarios(mockUsuarios);
+      
       } else {
         // Erro no login
         const errorMessage = data.message || 'Email ou senha incorretos!';

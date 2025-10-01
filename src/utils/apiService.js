@@ -7,7 +7,7 @@ class ApiService {
       const apiHost = isLocalNetwork ? window.location.hostname : 'localhost';
       return `http://${apiHost}:3001/api`;
     })();
-    console.log('🌐 API Base URL:', this.baseUrl);
+   
   }
 
   // Pegar o token do localStorage

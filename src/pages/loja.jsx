@@ -117,13 +117,7 @@ function ProductCard({ product, onAddToCart, isInCart }) {
 }
 
 function ProductList({ products, onAddToCart, cartItems }) {
-  console.log('🛍️ ProductList renderizado com:', { 
-    productsCount: products.length, 
-    products: products.slice(0, 2) // só os primeiros 2 para não poluir
-  });
-  
   if (products.length === 0) {
-    console.log('⚠️ Nenhum produto para exibir');
     return <p className="no-products-found">Nenhum produto encontrado com os filtros selecionados.</p>
   }
   
@@ -155,9 +149,7 @@ function Loja() {
   useEffect(() => {
     const carregarProdutos = async () => {
       try {
-        console.log('🔄 Carregando produtos da API...');
         const response = await apiService.listarProdutosPublicos();
-        console.log('📦 Resposta da API:', response);
         
         if (response.success) {
           // Converter formato do backend para formato esperado pelo frontend
@@ -172,11 +164,9 @@ function Loja() {
           
           setProdutos(produtosFormatados);
         } else {
-          console.error(' Resposta da API não foi success:', response);
           setProdutos([]);
         }
       } catch (error) {
-        console.error(' Erro ao carregar produtos:', error);
         setProdutos([]); // Array vazio em caso de erro
       } finally {
         setLoading(false);
