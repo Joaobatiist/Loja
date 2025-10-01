@@ -1,11 +1,24 @@
 import React from 'react';
 
-const DashboardContent = ({ produtos, usuarios, user }) => {
+const DashboardContent = ({ produtos, usuarios, user, onCadastrarFuncionario }) => {
   return (
     <div className="dashboard-content">
       <div className="dashboard-welcome">
         <h2>Bem-vindo ao LimpaTech Dashboard</h2>
         <p>Sistema de gestão de produtos e usuários</p>
+        
+        {/* Botão para cadastrar funcionário - apenas para admins */}
+        {user?.role === 'ADMIN' && (
+          <div className="admin-actions">
+            <button 
+              className="btn-cadastrar-funcionario"
+              onClick={onCadastrarFuncionario}
+            >
+              <span className="btn-icon">👨‍💼</span>
+              Cadastrar Funcionário
+            </button>
+          </div>
+        )}
       </div>
       
       <div className="dashboard-stats">

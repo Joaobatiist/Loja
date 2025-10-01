@@ -1,16 +1,51 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 
 const CadastroForm = ({ novoProduto, setNovoProduto, onSubmit }) => {
   const [fotoPreview, setFotoPreview] = useState(null);
 
+  // Limpar preview quando o produto for resetado
+  useEffect(() => {
+    if (!novoProduto?.foto) {
+      setFotoPreview(null);
+    }
+  }, [novoProduto?.foto]);
+
   // useCallback garante que a função não será recriada em toda renderização
   const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
+    
     if (file) {
+      // Verificar se é uma imagem
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecione apenas arquivos de imagem.');
+        e.target.value = '';
+        return;
+      }
+      
+      // Verificar tamanho do arquivo (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Arquivo muito grande. Selecione uma imagem menor que 5MB.');
+        e.target.value = '';
+        return;
+      }
+      
+      // Processar de forma síncrona e simples para evitar problemas
       const reader = new FileReader();
-      reader.onload = () => setFotoPreview(reader.result);
+      reader.onload = (event) => {
+        setFotoPreview(event.target.result);
+        // Usar setTimeout para evitar conflitos de estado
+        setTimeout(() => {
+          setNovoProduto(prev => ({ ...prev, foto: file }));
+        }, 0);
+      };
+      reader.onerror = () => {
+        alert('Erro ao ler arquivo. Tente novamente.');
+        e.target.value = '';
+      };
       reader.readAsDataURL(file);
-      setNovoProduto(prev => ({ ...prev, foto: file }));
+    } else {
+      setFotoPreview(null);
+      setNovoProduto(prev => ({ ...prev, foto: null }));
     }
   }, [setNovoProduto]);
 

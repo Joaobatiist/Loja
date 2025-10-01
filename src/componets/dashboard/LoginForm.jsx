@@ -3,10 +3,24 @@ import React, { useState } from 'react';
 const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin(email, password);
+    setLoading(true);
+    setError('');
+    
+    try {
+      await onLogin(email, password);
+      // Se chegou aqui, o login foi bem-sucedido
+      setEmail('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message || 'Erro ao fazer login. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -20,6 +34,13 @@ const LoginForm = ({ onLogin }) => {
           </div>
           
           <form onSubmit={handleSubmit} className="login-form">
+            {error && (
+              <div className="error-message">
+                <span className="error-icon">⚠️</span>
+                {error}
+              </div>
+            )}
+            
             <div className="form-group">
               <label htmlFor="email" className="form-label">E-mail</label>
               <input
@@ -30,6 +51,7 @@ const LoginForm = ({ onLogin }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Digite seu e-mail"
                 required
+                disabled={loading}
               />
             </div>
             
@@ -43,18 +65,24 @@ const LoginForm = ({ onLogin }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
                 required
+                disabled={loading}
               />
             </div>
             
-            <button type="submit" className="login-button">
-              Entrar no Sistema
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="loading-spinner">⏳</span>
+                  Entrando...
+                </>
+              ) : (
+                'Entrar no Sistema'
+              )}
             </button>
           </form>
           
           <div className="login-footer">
-            <p className="demo-info">
-              <strong>Demo:</strong> admin@limpatech.com (Admin) | user@limpatech.com (Usuário)
-            </p>
+           
           </div>
         </div>
       </div>

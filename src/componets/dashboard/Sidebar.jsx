@@ -1,18 +1,18 @@
 import React from 'react';
 
 const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
-  // Debug para verificar se o usuário está sendo passado
-  console.log('Sidebar user:', user);
-  
   const menuItems = user?.role === 'ADMIN' ? [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
     { id: 'cadastrar-produto', icon: '📦', label: 'Cadastrar Produto' },
     { id: 'gerenciar-produtos', icon: '📋', label: 'Gerenciar Produtos' },
     { id: 'gerenciar-usuarios', icon: '👥', label: 'Gerenciar Usuários' },
+    { id: 'voltar-para-loja', icon: '🛒', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
     { id: 'sair', icon: '🚪', label: 'Sair', action: handleLogout }
   ] : [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
     { id: 'cadastrar-produto', icon: '📦', label: 'Cadastrar Produto' },
+    { id: 'gerenciar-produtos', icon: '📋', label: 'Gerenciar Produtos' },
+    { id: 'voltar-para-loja', icon: '🛒', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
     { id: 'sair', icon: '🚪', label: 'Sair', action: handleLogout }
   ];
 
@@ -32,7 +32,9 @@ const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSideba
     <div className={`sidebar ${isSidebarOpen ? 'open' : 'collapsed'}`}>
       <div className="sidebar-header">
         <img src="/img/logo.png" alt="LimpaTech" className="sidebar-logo" />
-        <h3 className="sidebar-title">LimpaTech</h3>
+        <div>
+          <h3 className="sidebar-title">LimpaTech</h3>
+        </div>
       </div>
       
       <nav className="sidebar-nav">

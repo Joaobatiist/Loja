@@ -1,6 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
+import EditarProdutoModal from './EditarProdutoModal';
 
-const GerenciarProdutos = ({ produtos, onDeleteProduto }) => {
+const GerenciarProdutos = ({ produtos, onDeleteProduto, onProdutoUpdated }) => {
+  const [produtoEditando, setProdutoEditando] = useState(null);
+
+  const handleEditarProduto = (produto) => {
+    setProdutoEditando(produto);
+  };
+
+  const handleExcluirProduto = (produto) => {
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir o produto "${produto.nome}"?\n\nEsta ação não pode ser desfeita.`
+    );
+    
+    if (confirmDelete) {
+      onDeleteProduto(produto.id);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setProdutoEditando(null);
+  };
+
+  const handleProdutoUpdated = () => {
+    onProdutoUpdated();
+    setProdutoEditando(null);
+  };
   return (
     <div className="gerenciar-produtos">
       <h2 className="component-title">Gerenciar Produtos</h2>
@@ -16,6 +41,7 @@ const GerenciarProdutos = ({ produtos, onDeleteProduto }) => {
             <table>
               <thead>
                 <tr>
+                  <th>Foto</th>
                   <th>Nome</th>
                   <th>Marca</th>
                   <th>Categoria</th>
@@ -25,21 +51,44 @@ const GerenciarProdutos = ({ produtos, onDeleteProduto }) => {
                 </tr>
               </thead>
               <tbody>
-                {produtos.map(produto => (
-                  <tr key={produto.id}>
+                {produtos.map((produto, index) => (
+                  <tr key={produto.id || `produto-${index}`}>
+                    <td>
+                      {produto.foto ? (
+                        <img 
+                          src={produto.foto} 
+                          alt={produto.nome}
+                          className="produto-thumb"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="produto-no-image">📦</div>
+                      )}
+                    </td>
                     <td>{produto.nome}</td>
                     <td>{produto.marca}</td>
                     <td>{produto.categoria}</td>
                     <td>{produto.quantidade}</td>
-                    <td>{produto.dataCadastro}</td>
+                    <td>{produto.dataCadastro || produto.created_at}</td>
                     <td>
-                      <button
-                        className="delete-button"
-                        onClick={() => onDeleteProduto(produto.id)}
-                        title="Excluir produto"
-                      >
-                        🗑️
-                      </button>
+                      <div className="action-buttons">
+                        <button
+                          className="edit-button"
+                          onClick={() => handleEditarProduto(produto)}
+                          title="Editar produto"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="delete-button"
+                          onClick={() => handleExcluirProduto(produto)}
+                          title="Excluir produto"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -49,21 +98,39 @@ const GerenciarProdutos = ({ produtos, onDeleteProduto }) => {
 
           {/* Cards para mobile */}
           <div className="produtos-cards">
-            {produtos.map(produto => (
-              <div key={produto.id} className="produto-card">
+            {produtos.map((produto, index) => (
+              <div key={produto.id || `produto-card-${index}`} className="produto-card">
                 <div className="produto-card-header">
+                  {produto.foto && (
+                    <div className="produto-card-image">
+                      <img 
+                        src={produto.foto} 
+                        alt={produto.nome}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
                   <div className="produto-card-info">
                     <h4>{produto.nome}</h4>
                     <p><strong>Marca:</strong> {produto.marca}</p>
                     <p><strong>Categoria:</strong> {produto.categoria}</p>
                     <p><strong>Quantidade:</strong> {produto.quantidade}</p>
-                    <p><strong>Data:</strong> {produto.dataCadastro}</p>
+                    <p><strong>Data:</strong> {produto.dataCadastro || produto.created_at}</p>
                   </div>
                 </div>
                 <div className="produto-card-actions">
                   <button
+                    className="edit-button"
+                    onClick={() => handleEditarProduto(produto)}
+                    title="Editar produto"
+                  >
+                    ✏️ Editar
+                  </button>
+                  <button
                     className="delete-button"
-                    onClick={() => onDeleteProduto(produto.id)}
+                    onClick={() => handleExcluirProduto(produto)}
                     title="Excluir produto"
                   >
                     🗑️ Excluir
@@ -73,6 +140,15 @@ const GerenciarProdutos = ({ produtos, onDeleteProduto }) => {
             ))}
           </div>
         </>
+      )}
+      
+      {/* Modal de edição */}
+      {produtoEditando && (
+        <EditarProdutoModal
+          produto={produtoEditando}
+          onClose={handleCloseModal}
+          onProdutoUpdated={handleProdutoUpdated}
+        />
       )}
     </div>
   );

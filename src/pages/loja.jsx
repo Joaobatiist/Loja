@@ -1,17 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '../style/loja.css';
-
-// --- MOCK DE PRODUTOS ---
-const mockProducts = [
-  { id: 1, brand: 'Nike', name: 'Tênis Air Max 90', category: 'Vestuário', image: '../../public/img/limpeza.jpg', quantity: 1 },
-  { id: 2, brand: 'Adidas', name: 'Camiseta Essentials Logo', category: 'Vestuário', image: 'https://via.placeholder.com/300x300.png?text=Camiseta+Adidas', quantity: 1},
-  { id: 3, brand: 'Apple', name: 'iPhone 15 Pro', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=iPhone+15', quantity: 1 },
-  { id: 4, brand: 'Samsung', name: 'Galaxy Watch 6', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=Galaxy+Watch', quantity: 1},
-  { id: 5, brand: 'Sony', name: 'Headphone WH-1000XM5', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=Headphone+Sony',quantity: 1 },
-  { id: 6, brand: 'Dell', name: 'Notebook XPS 15', category: 'Eletrônicos', image: 'https://via.placeholder.com/300x300.png?text=Notebook+Dell',quantity: 1 },
-  { id: 7, brand: 'Puma', name: 'Moletom com Capuz Essentials', category: 'Vestuário', image: 'https://via.placeholder.com/300x300.png?text=Moletom+Puma',quantity: 1 },
-  { id: 8, brand: 'Calvin Klein', name: 'Jaqueta Jeans Clássica', category: 'Vestuário', image: 'https://via.placeholder.com/300x300.png?text=Jaqueta+Jeans',quantity: 1 },
-];
+import apiService from '../utils/apiService';
+import LojasParceiras from '../componets/lojasParceiras/index.jsx';
 
 function Header({ onToggleCart, cartCount, isMenuOpen, onToggleMenu }) {
   return (
@@ -44,14 +34,14 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <p>&copy; 2025 SuaLoja. Todos os direitos reservados.</p>
+        <p>&copy;  Limpa Tech. CNPJ:02.926.607.0001-22 Todos os direitos reservados. 2025</p>
       </div>
     </footer>
   );
 }
 
 function Catalog({ cartItems, onRemoveItem, onUpdateQuantity, isOpen, onClose }) {
-  const numeroWhatsApp = "71999222524"; // seu número
+  const numeroWhatsApp = "7599801234"; // seu número
   const handleConsultPrice = () => {
     if (cartItems.length === 0) {
       alert("Seu carrinho está vazio. Adicione produtos para consultar o preço.");
@@ -120,16 +110,23 @@ function ProductCard({ product, onAddToCart, isInCart }) {
         className={`add-to-cart-button ${isInCart ? 'added' : ''}`}
         disabled={isInCart}
       >
-        {isInCart ? 'Adicionado ✓' : 'Adicionar ao Catálogo'}
+        {isInCart ? 'Adicionado ✓' : 'Adicionar ao Carrinho'}
       </button>
     </div>
   );
 }
 
 function ProductList({ products, onAddToCart, cartItems }) {
+  console.log('🛍️ ProductList renderizado com:', { 
+    productsCount: products.length, 
+    products: products.slice(0, 2) // só os primeiros 2 para não poluir
+  });
+  
   if (products.length === 0) {
+    console.log('⚠️ Nenhum produto para exibir');
     return <p className="no-products-found">Nenhum produto encontrado com os filtros selecionados.</p>
   }
+  
   return (
     <div className="product-list">
       {products.map(product => (
@@ -151,6 +148,43 @@ function Loja() {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Carregar produtos da API
+  useEffect(() => {
+    const carregarProdutos = async () => {
+      try {
+        console.log('🔄 Carregando produtos da API...');
+        const response = await apiService.listarProdutosPublicos();
+        console.log('📦 Resposta da API:', response);
+        
+        if (response.success) {
+          // Converter formato do backend para formato esperado pelo frontend
+          const produtosFormatados = response.data.map(produto => ({
+            id: produto.id,
+            brand: produto.marca,
+            name: produto.nome,
+            category: produto.categoria,
+            image: produto.foto || 'https://via.placeholder.com/300x300.png?text=Sem+Foto',
+            quantity: 1 // quantidade inicial para o carrinho
+          }));
+          
+          setProdutos(produtosFormatados);
+        } else {
+          console.error(' Resposta da API não foi success:', response);
+          setProdutos([]);
+        }
+      } catch (error) {
+        console.error(' Erro ao carregar produtos:', error);
+        setProdutos([]); // Array vazio em caso de erro
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarProdutos();
+  }, []);
 
   // Função para adicionar um item ao carrinho
   const handleAddToCart = (productToAdd) => {
@@ -194,19 +228,19 @@ function Loja() {
   };
 
   const categories = useMemo(() => 
-    ['Todas', ...new Set(mockProducts.map(p => p.category))],
-    []
+    ['Todas', ...new Set(produtos.map(p => p.category))],
+    [produtos]
   );
 
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return produtos.filter(product => {
       const matchesCategory = selectedCategory === 'Todas' || product.category === selectedCategory;
       const matchesSearch =
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, produtos]);
 
   return (
     <div className="app loja-container">
@@ -242,11 +276,17 @@ function Loja() {
               </div>
             </div>
 
-            <ProductList
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-              cartItems={cartItems}
-            />
+            {loading ? (
+              <div className="loading-state">
+                <p>Carregando produtos...</p>
+              </div>
+            ) : (
+              <ProductList
+                products={filteredProducts}
+                onAddToCart={handleAddToCart}
+                cartItems={cartItems}
+              />
+            )}
           </div>
         </section>
 
@@ -259,23 +299,79 @@ function Loja() {
           onClose={() => setIsCartOpen(false)}
         />
 
-        <section id="sobre" className="section section-light">
-          <div className="container">
-            <h2 className="section-title">Sobre Nossa Loja</h2>
-            <p className="section-content">
-              Bem-vindo à SuaLoja, o seu destino para produtos incríveis e de alta qualidade. Nossa missão é oferecer uma curadoria especial de itens que combinam estilo, inovação e funcionalidade. Navegue pelo nosso catálogo e entre em contato para um atendimento personalizado.
-            </p>
-          </div>
-        </section>
+    <section id="sobre" className="section section-light">
+  <div className="container">
+    <div className="content-card">
+      <h2 className="section-title">Sobre nós</h2>
+      <div className="sobre-container">
         
-        <section id="contato" className="section">
-          <div className="container">
-            <h2 className="section-title">Entre em Contato</h2>
-            <p className="section-content">
-              Tem alguma dúvida ou quer fazer um pedido especial? Fale conosco! A melhor forma de nos contatar é através do WhatsApp, clicando em "Consultar Preços" no seu catálogo. Ou, se preferir, envie um email para: <strong>contato@sualoja.com</strong>
+        {/* Coluna da Imagem */}
+        <div className="sobre-imagem">
+          {/* Você pode usar uma foto ou até mesmo sua logo aqui */}
+          <img src="/img/logo.png" alt="Logo Limpa Tech" /> 
+        </div>
+
+        {/* Coluna do Texto */}
+        <div className="sobre-texto">
+          <div className="section-content">
+            <p>
+              A Limpa Tech nasceu para facilitar o seu dia a dia com soluções completas em limpeza e bem-estar. Trabalhamos com produtos de limpeza geral, hospitalar e para piscinas, sempre prezando pela qualidade e confiança que seu ambiente merece.
+            </p>
+            <p>
+              Temos também uma parceria exclusiva com a <strong>Capim Cheiroso</strong>, trazendo aromatizadores de ambiente que transformam qualquer espaço em um lugar mais agradável. E se você busca uma experiência ainda mais marcante, oferecemos <strong>marketing olfativo</strong>: alugamos a máquina e fornecemos as essências para que seu empreendimento tenha sempre o aroma perfeito, liberado em intervalos de tempo pré-definidos.
+            </p>
+            <p>
+              Na Limpa Tech, você encontra muito mais que produtos: encontra praticidade, cuidado e o toque especial que deixa cada ambiente único.
             </p>
           </div>
-        </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<LojasParceiras />
+            
+        <section id="contato" className="section">
+  <div className="container">
+    <div className="content-card"> {/* Opcional: use o card de vidro que criamos antes para um visual consistente */}
+      <h2 className="section-title">Entre em Contato</h2>
+      <p className="section-content" style={{ marginBottom: '40px' }}>
+        Tem alguma dúvida ou quer fazer um pedido especial? Fale conosco! Estamos sempre prontos para ajudar. Escolha um dos canais abaixo:
+      </p>
+
+      {/* Container para os contatos principais */}
+      <div className="contact-info">
+        {/* Lembre-se de trocar SEUNUMERO pelo seu número de telefone/WhatsApp */}
+        <a href="https://wa.me/557599801234" target="_blank" rel="noopener noreferrer" className="contact-item">
+          <i className="fa-brands fa-whatsapp"></i>
+          <span>(75) 99801234</span>
+        </a>
+        <a href="tel:+5571999222524" className="contact-item">
+          <i className="fa-solid fa-phone"></i>
+          <span>Ligue para nós</span>
+        </a>
+        {/* Lembre-se de trocar para o seu email */}
+        <a href="mailto:limpatechmaterialdelimpeza@gmail.com" className="contact-item">
+          <i className="fa-solid fa-envelope"></i>
+          <span> limpatechmaterialdelimpeza@gmail.com</span>
+        </a>
+      </div>
+
+      {/* Container para as redes sociais */}
+      <div className="social-media">
+        <h3>Siga-nos nas Redes Sociais</h3>
+        <div className="social-icons">
+          {/* Lembre-se de trocar o '#' pelo link do seu perfil */}
+          <a href="https://www.instagram.com/limpatechlimpeza/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <i className="fa-brands fa-instagram"></i>
+          </a>
+          
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
       </main>
       <Footer />
     </div>

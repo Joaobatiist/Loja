@@ -1,0 +1,62 @@
+/* --- SEÇÃO DE PARCEIROS / LOGO SCROLLER --- */
+
+#parceiros .section-title {
+  color: #000000; /* Para contrastar com o fundo gradiente */
+  margin-bottom: 50px;
+}
+
+.logo-scroller {
+  max-width: 1000px;
+  margin: 0 auto;
+  overflow: hidden;
+  /* Efeito de fade nas laterais para um visual mais suave */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 20%, #000 80%, transparent);
+}
+
+.logo-track {
+  display: flex;
+  /* Animação: nome, duração, tipo, repetição */
+  animation: scroll 80s linear infinite;
+  /* O truque para o loop: a largura é o dobro do número de logos */
+  /* (largura do slide) * (número de logos) * 2 */
+  width: calc(250px * 48); /* Exemplo: 250px por logo, 5 logos -> 250*10 */
+}
+
+/* Pausa a animação ao passar o mouse */
+.logo-scroller:hover .logo-track {
+  animation-play-state: paused;
+}
+
+.logo-slide {
+  width: 250px; /* Largura fixa para cada logo */
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-slide img {
+  max-width: 100%;
+  height: 80px; /* Altura fixa para manter a consistência */
+  object-fit: contain;
+  filter: grayscale(1) brightness(1.5); /* Deixa os logos em escala de cinza e mais claros */
+  transition: var(--transicao);
+}
+
+.logo-slide:hover img {
+  filter: grayscale(0) brightness(1); /* Volta à cor original no hover */
+  transform: scale(1.1);
+}
+
+/* A animação que move a faixa de logos */
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* O truque da animação: move a faixa pela metade da sua largura total */
+    /* (largura do slide) * (número de logos) */
+    transform: translateX(calc(-250px * 24)); /* Exemplo: 250px por logo, 5 logos -> 250*5 */
+  }
+}

@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
+import EditarUsuarioModal from './EditarUsuarioModal';
 
-const GerenciarUsuarios = ({ usuarios, onDeleteUsuario }) => {
+const GerenciarUsuarios = ({ usuarios, onDeleteUsuario, onUpdateUsuario }) => {
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+
+  const handleEditarUsuario = (usuario) => {
+    setUsuarioEditando(usuario);
+  };
+
+  const handleCloseModal = () => {
+    setUsuarioEditando(null);
+  };
+
+  const handleSuccessEdit = () => {
+    setUsuarioEditando(null);
+    if (onUpdateUsuario) {
+      onUpdateUsuario(); // Callback para recarregar a lista
+    }
+  };
   return (
     <div className="gerenciar-usuarios">
       <h2 className="component-title">Gerenciar Usuários</h2>
@@ -29,7 +46,7 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario }) => {
                 <td>
                   <button
                     className="edit-button"
-                    onClick={() => alert('Funcionalidade de edição será implementada')}
+                    onClick={() => handleEditarUsuario(usuario)}
                     title="Editar usuário"
                   >
                     ✏️
@@ -64,7 +81,7 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario }) => {
             <div className="usuario-card-actions">
               <button
                 className="edit-button"
-                onClick={() => alert('Funcionalidade de edição será implementada')}
+                onClick={() => handleEditarUsuario(usuario)}
                 title="Editar usuário"
               >
                 ✏️ Editar
@@ -80,6 +97,15 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario }) => {
           </div>
         ))}
       </div>
+
+      {/* Modal de Edição */}
+      {usuarioEditando && (
+        <EditarUsuarioModal
+          usuario={usuarioEditando}
+          onClose={handleCloseModal}
+          onSuccess={handleSuccessEdit}
+        />
+      )}
     </div>
   );
 };
