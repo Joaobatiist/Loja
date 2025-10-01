@@ -343,7 +343,7 @@ function Loja() {
         {/* Lembre-se de trocar para o seu email */}
         <a href="mailto:limpatechmaterialdelimpeza@gmail.com" className="contact-item">
           <i className="fa-solid fa-envelope"></i>
-          <span> limpatechmaterialdelimpeza@gmail.com</span>
+          <span>Email</span>
         </a>
       </div>
 
