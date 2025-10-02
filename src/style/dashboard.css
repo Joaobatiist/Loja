@@ -932,18 +932,17 @@ body {
 
 /* ===== RESPONSIVE DESIGN ===== */
 
-/* Desktop e Tablets grandes */
 @media (min-width: 1024px) {
- .dashboard .menu-toggle {
+  .dashboard .menu-toggle {
     display:flex !important;
   }
   .sidebar {
-    position: static;
+    /* A linha 'position: static;' foi removida */
     transform: translateX(0) !important;
   }
   
   .dashboard-main {
-    margin-left: 0px;
+    /* A linha 'margin-left: 0px;' foi removida */
   }
   
   .dashboard-main.expanded {
