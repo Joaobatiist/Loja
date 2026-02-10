@@ -83,7 +83,7 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
       }
       
       // Usar apiService que já tem o token e URL corretos
-      const response = await apiService.cadastrarFuncionario({
+      await apiService.cadastrarFuncionario({
         nome: funcionario.nome,
         email: funcionario.email,
         senha: funcionario.senha,

@@ -248,7 +248,12 @@ function Loja() {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
     // Scroll para o topo da seção de produtos
-    document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      const element = document.getElementById('produtos');
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   return (
