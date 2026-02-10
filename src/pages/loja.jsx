@@ -144,6 +144,8 @@ function Loja() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 15;
 
   // Carregar produtos da API
   useEffect(() => {
@@ -232,6 +234,23 @@ function Loja() {
     });
   }, [searchTerm, selectedCategory, produtos]);
 
+  // Resetar página quando filtros mudarem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
+  // Calcular produtos da página atual
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll para o topo da seção de produtos
+    document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="app loja-container">
       <Header 
@@ -271,11 +290,41 @@ function Loja() {
                 <p>Carregando produtos...</p>
               </div>
             ) : (
-              <ProductList
-                products={filteredProducts}
-                onAddToCart={handleAddToCart}
-                cartItems={cartItems}
-              />
+              <>
+                <ProductList
+                  products={currentProducts}
+                  onAddToCart={handleAddToCart}
+                  cartItems={cartItems}
+                />
+                
+                {/* Controles de Paginação */}
+                {filteredProducts.length > productsPerPage && (
+                  <div className="pagination">
+                    <button 
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="pagination-button"
+                    >
+                      ← Anterior
+                    </button>
+                    
+                    <div className="pagination-info">
+                      <span>Página {currentPage} de {totalPages}</span>
+                      <span className="products-count">
+                        ({filteredProducts.length} produto{filteredProducts.length !== 1 ? 's' : ''})
+                      </span>
+                    </div>
+                    
+                    <button 
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="pagination-button"
+                    >
+                      Próximo →
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>

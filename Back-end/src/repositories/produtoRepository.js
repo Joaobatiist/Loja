@@ -17,7 +17,7 @@ class ProdutoRepository {
           email
         )
       `)
-      .order('created_at', { ascending: false });
+      .order('nome', { ascending: true });
     
     if (error) {
       throw new Error(`Erro ao buscar produtos: ${error.message}`);
@@ -108,7 +108,7 @@ class ProdutoRepository {
       query = query.gt('quantidade', 0);
     }
 
-    query = query.order('created_at', { ascending: false });
+    query = query.order('nome', { ascending: true });
 
     const { data, error } = await query;
 
