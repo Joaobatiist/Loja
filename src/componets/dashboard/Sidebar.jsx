@@ -1,19 +1,20 @@
 import React from 'react';
 
 const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSidebarOpen, handleLogout }) => {
+  // Substituídos os emojis por classes de ícones do Font Awesome nas listas de navegação
   const menuItems = user?.role === 'ADMIN' ? [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'cadastrar-produto', icon: '📦', label: 'Cadastrar Produto' },
-    { id: 'gerenciar-produtos', icon: '📋', label: 'Gerenciar Produtos' },
-    { id: 'gerenciar-usuarios', icon: '👥', label: 'Gerenciar Usuários' },
-    { id: 'voltar-para-loja', icon: '🛒', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
-    { id: 'sair', icon: '🚪', label: 'Sair', action: handleLogout }
+    { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
+    { id: 'cadastrar-produto', icon: 'fas fa-box-open', label: 'Cadastrar Produto' },
+    { id: 'gerenciar-produtos', icon: 'fas fa-list-alt', label: 'Gerenciar Produtos' },
+    { id: 'gerenciar-usuarios', icon: 'fas fa-users', label: 'Gerenciar Usuários' },
+    { id: 'voltar-para-loja', icon: 'fas fa-shopping-cart', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
+    { id: 'sair', icon: 'fas fa-sign-out-alt', label: 'Sair', action: handleLogout }
   ] : [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'cadastrar-produto', icon: '📦', label: 'Cadastrar Produto' },
-    { id: 'gerenciar-produtos', icon: '📋', label: 'Gerenciar Produtos' },
-    { id: 'voltar-para-loja', icon: '🛒', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
-    { id: 'sair', icon: '🚪', label: 'Sair', action: handleLogout }
+    { id: 'dashboard', icon: 'fas fa-home', label: 'Dashboard' },
+    { id: 'cadastrar-produto', icon: 'fas fa-box-open', label: 'Cadastrar Produto' },
+    { id: 'gerenciar-produtos', icon: 'fas fa-list-alt', label: 'Gerenciar Produtos' },
+    { id: 'voltar-para-loja', icon: 'fas fa-shopping-cart', label: 'Voltar para Loja', action: () => { window.location.href = '/' } },
+    { id: 'sair', icon: 'fas fa-sign-out-alt', label: 'Sair', action: handleLogout }
   ];
 
   const handleItemClick = (item) => {
@@ -44,7 +45,9 @@ const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSideba
             className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
             onClick={() => handleItemClick(item)}
           >
-            <span className="sidebar-icon">{item.icon}</span>
+            <span className="sidebar-icon">
+              <i className={item.icon}></i>
+            </span>
             <span className="sidebar-label">{item.label}</span>
           </button>
         ))}
@@ -53,7 +56,9 @@ const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSideba
       <div className="sidebar-footer">
         {user ? (
           <div className="user-info">
-            <div className="user-avatar">👤</div>
+            <div className="user-avatar">
+              <i className="fas fa-user-circle"></i>
+            </div>
             <div className="user-details">
               <p className="user-name">{user.nome || 'Usuário'}</p>
               <p className="user-role">{user.role === 'ADMIN' ? 'Administrador' : 'Usuário'}</p>
@@ -61,7 +66,9 @@ const Sidebar = ({ user, currentPage, setCurrentPage, isSidebarOpen, setIsSideba
           </div>
         ) : (
           <div className="user-info">
-            <div className="user-avatar">👤</div>
+            <div className="user-avatar">
+              <i className="fas fa-spinner fa-spin"></i>
+            </div>
             <div className="user-details">
               <p className="user-name">Carregando...</p>
               <p className="user-role">-</p>

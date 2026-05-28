@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Pencil, X, Loader2, Save } from 'lucide-react'; // Importação dos novos ícones
+import { usuarioService } from '../../service/usuarioService';
 
 const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -54,17 +56,14 @@ const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
     setErrors({});
 
     try {
-      // Importar apiService dinamicamente para evitar problemas de circular import
-      const { default: apiService } = await import('../../utils/apiService');
+      await usuarioService.atualizar(usuario.id, formData);
       
-      await apiService.atualizarUsuario(usuario.id, formData);
-      
-      // Chamar callback de sucesso
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Erro ao atualizar usuário';
+      console.error("Erro ao atualizar:", error);
+      const errorMessage = error.message || 'Erro ao atualizar usuário';
       setErrors({ submit: errorMessage });
     } finally {
       setIsLoading(false);
@@ -75,7 +74,6 @@ const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Limpar erro do campo quando usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -85,8 +83,18 @@ const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
     <div className="modal-overlay">
       <div className="modal-content editar-usuario-modal">
         <div className="modal-header">
-          <h3>✏️ Editar Usuário</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <div className="modal-title-wrapper">
+            <Pencil size={20} className="modal-title-icon" />
+            <h3>Editar Usuário</h3>
+          </div>
+          <button 
+            className="close-btn" 
+            onClick={onClose} 
+            aria-label="Fechar modal"
+            disabled={isLoading}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="editar-usuario-form">
@@ -143,7 +151,7 @@ const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Botões */}
+          {/* Botões de Ação */}
           <div className="form-actions">
             <button 
               type="button" 
@@ -158,7 +166,17 @@ const EditarUsuarioModal = ({ usuario, onClose, onSuccess }) => {
               className="btn-primary"
               disabled={isLoading}
             >
-              {isLoading ? '⏳ Salvando...' : '💾 Salvar Alterações'}
+              {isLoading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save size={16} />
+                  Salvar Alterações
+                </>
+              )}
             </button>
           </div>
         </form>
