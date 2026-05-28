@@ -388,7 +388,7 @@ body {
 
 /* ... (O restante do seu CSS até o footer permanece igual) ... */
 .no-products-found { text-align: center; font-size: 1.1rem; color: var(--texto-cinza); padding: 40px 0; grid-column: 1 / -1; }
-.loading-state { text-align: center; font-size: 1.1rem; color: var(--texto-claro); padding: 60px 0; grid-column: 1 / -1; }
+.loading-state { text-align: center; font-size: 1.1rem; color: var(--cor-primaria); padding: 60px 0; grid-column: 1 / -1; }
 .loading-state p { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .loading-state p::after { content: ''; width: 20px; height: 20px; border: 2px solid var(--texto-claro); border-top: 2px solid var(--cor-primaria); border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

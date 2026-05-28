@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react'; // Importando os ícones
 import EditarUsuarioModal from './EditarUsuarioModal';
 
 const GerenciarUsuarios = ({ usuarios, onDeleteUsuario, onUpdateUsuario }) => {
@@ -18,6 +19,7 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario, onUpdateUsuario }) => {
       onUpdateUsuario(); // Callback para recarregar a lista
     }
   };
+
   return (
     <div className="gerenciar-usuarios">
       <h2 className="component-title">Gerenciar Usuários</h2>
@@ -49,14 +51,14 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario, onUpdateUsuario }) => {
                     onClick={() => handleEditarUsuario(usuario)}
                     title="Editar usuário"
                   >
-                    ✏️
+                    <Pencil size={16} className="btn-icon" />
                   </button>
                   <button
                     className="delete-button"
                     onClick={() => onDeleteUsuario(usuario.id)}
                     title="Excluir usuário"
                   >
-                    🗑️
+                    <Trash2 size={16} className="btn-icon" />
                   </button>
                 </td>
               </tr>
@@ -84,14 +86,14 @@ const GerenciarUsuarios = ({ usuarios, onDeleteUsuario, onUpdateUsuario }) => {
                 onClick={() => handleEditarUsuario(usuario)}
                 title="Editar usuário"
               >
-                ✏️ Editar
+                <Pencil size={16} className="btn-icon" /> Editar
               </button>
               <button
                 className="delete-button"
                 onClick={() => onDeleteUsuario(usuario.id)}
                 title="Excluir usuário"
               >
-                🗑️ Excluir
+                <Trash2 size={16} className="btn-icon" /> Excluir
               </button>
             </div>
           </div>

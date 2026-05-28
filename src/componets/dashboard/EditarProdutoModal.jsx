@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import apiService from '../../utils/apiService';
+import { produtoService } from '../../service/produtoService';
 
 const EditarProdutoModal = ({ produto, onClose, onProdutoUpdated }) => {
   const [formData, setFormData] = useState({
@@ -113,7 +113,7 @@ const EditarProdutoModal = ({ produto, onClose, onProdutoUpdated }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -142,22 +142,23 @@ const EditarProdutoModal = ({ produto, onClose, onProdutoUpdated }) => {
         dadosAtualizacao.foto = await compressImage(formData.foto);
       }
 
-      const response = await apiService.atualizarProduto(produto.id, dadosAtualizacao);
-
-      if (response.success) {
-        onProdutoUpdated();
-        onClose();
+      const data = await produtoService.atualizarProduto(produto.id, dadosAtualizacao);
+     
+      if (data) {
         alert('Produto atualizado com sucesso!');
+        onProdutoUpdated(); 
+        onClose();         
       } else {
-        throw new Error(response.message || 'Erro ao atualizar produto');
+        throw new Error('Não foi possível obter os dados atualizados do produto.');
       }
     } catch (error) {
-      setError(error.message);
+     
+      console.error("Erro ao atualizar:", error);
+      setError(error.message || 'Erro inesperado ao atualizar o produto.');
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="modal-overlay">
       <div className="modal-content">

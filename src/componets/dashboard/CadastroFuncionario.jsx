@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
-import apiService from '../../utils/apiService';
+import { usuarioService } from '../../service/usuarioService';
 
-const CadastroFuncionario = ({ onClose, onSuccess }) => {
-  // Simular dados do usuário logado (em produção viria do AuthContext)
-  const user = JSON.parse(localStorage.getItem('limpatech_user') || '{}');
+const CadastroFuncionario = ({ onClose, onSuccess, user }) => {
   
   const [funcionario, setFuncionario] = useState({
     nome: '',
     email: '',
     senha: '',
     confirmarSenha: '',
-    role: 'USER' // Padrão como USER
+    role: 'USER'
   });
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Verificar se o usuário é admin
   const isAdmin = user?.role === 'ADMIN';
 
   // Se não for admin, mostrar mensagem de acesso negado
@@ -26,7 +23,7 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
       <div className="funcionario-modal">
         <div className="funcionario-content">
           <div className="access-denied">
-            <h3>🚫 Acesso Negado</h3>
+            <h3><i className="fas fa-ban token-icon-danger"></i> Acesso Negado</h3>
             <p>Apenas administradores podem cadastrar funcionários.</p>
             <p>Seu nível atual: <strong>{user?.role || 'Não definido'}</strong></p>
             <button onClick={onClose} className="close-btn-access">
@@ -38,7 +35,6 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
     );
   }
 
-  // Validação
   const validateForm = () => {
     const newErrors = {};
 
@@ -66,7 +62,6 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Submissão do formulário
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -75,60 +70,46 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
     setIsLoading(true);
     
     try {
-      // Pegar token do localStorage
-      const token = localStorage.getItem('limpatech_token');
-      
-      if (!token) {
-        throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-      }
-      
-      // Usar apiService que já tem o token e URL corretos
-      await apiService.cadastrarFuncionario({
+      const resultado = await usuarioService.criarUsuario({
         nome: funcionario.nome,
         email: funcionario.email,
         senha: funcionario.senha,
         role: funcionario.role
       });
 
-      setSuccess(true);
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess(); // Chama callback para recarregar usuários e fechar modal
-        } else {
-          onClose(); // Fallback caso onSuccess não seja fornecido
-        }
-      }, 2000);
+      if (resultado.success) {
+        setSuccess(true);
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            onClose();
+          }
+        }, 2000);
+      }
       
     } catch (error) {
       const errorMessage = error.message || 'Erro ao cadastrar funcionário';
       setErrors({ submit: errorMessage });
-      
-      // Se for erro de autorização, mostrar mensagem específica
-      if (error.response?.status === 403) {
-        setErrors({ submit: 'Acesso negado: Apenas administradores podem cadastrar funcionários' });
-      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Mudança nos inputs
   const handleChange = (field, value) => {
     setFuncionario(prev => ({ ...prev, [field]: value }));
     
-    // Limpar erro do campo quando usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  // Se o cadastro foi bem-sucedido
   if (success) {
     return (
       <div className="funcionario-modal">
         <div className="funcionario-content">
           <div className="success-message">
-            <h3>✅ Funcionário cadastrado com sucesso!</h3>
+            <h3><i className="fas fa-check-circle token-icon-success"></i> Funcionário cadastrado com sucesso!</h3>
             <p>O novo funcionário foi adicionado ao sistema.</p>
             <p>Redirecionando...</p>
           </div>
@@ -141,14 +122,14 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
     <div className="funcionario-modal">
       <div className="funcionario-content">
         <div className="funcionario-header">
-          <h2>📝 Cadastrar Funcionário</h2>
-          <span className="admin-badge">👨‍💼 Admin: {user?.nome}</span>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <h2><i className="fas fa-user-plus"></i> Cadastrar Funcionário</h2>
+          <span className="admin-badge"><i className="fas fa-user-shield"></i> Admin: {user?.nome}</span>
+          <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
 
         {errors.submit && (
           <div className="error-message">
-            <span className="error-icon">⚠️</span>
+            <span className="error-icon"><i className="fas fa-exclamation-triangle"></i></span>
             {errors.submit}
           </div>
         )}
@@ -156,13 +137,12 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
         <form onSubmit={handleSubmit} className="funcionario-form">
           <div className="input-group">
             <label htmlFor="nome">
-              <span className="label-icon">👤</span>
+              <span className="label-icon"><i className="fas fa-user"></i></span>
               Nome Completo
             </label>
             <input
               type="text"
               id="nome"
-              name="nome"
               value={funcionario.nome}
               onChange={(e) => handleChange('nome', e.target.value)}
               required
@@ -174,13 +154,12 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
 
           <div className="input-group">
             <label htmlFor="email">
-              <span className="label-icon">📧</span>
+              <span className="label-icon"><i className="fas fa-envelope"></i></span>
               Email Corporativo
             </label>
             <input
               type="email"
               id="email"
-              name="email"
               value={funcionario.email}
               onChange={(e) => handleChange('email', e.target.value)}
               required
@@ -192,13 +171,12 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
 
           <div className="input-group">
             <label htmlFor="senha">
-              <span className="label-icon">🔒</span>
+              <span className="label-icon"><i className="fas fa-lock"></i></span>
               Senha Inicial
             </label>
             <input
               type="password"
               id="senha"
-              name="senha"
               value={funcionario.senha}
               onChange={(e) => handleChange('senha', e.target.value)}
               required
@@ -213,13 +191,12 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
 
           <div className="input-group">
             <label htmlFor="confirmarSenha">
-              <span className="label-icon">🔐</span>
+              <span className="label-icon"><i className="fas fa-key"></i></span>
               Confirmar Senha
             </label>
             <input
               type="password"
               id="confirmarSenha"
-              name="confirmarSenha"
               value={funcionario.confirmarSenha}
               onChange={(e) => handleChange('confirmarSenha', e.target.value)}
               required
@@ -231,19 +208,18 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
 
           <div className="input-group">
             <label htmlFor="role">
-              <span className="label-icon">👨‍💼</span>
+              <span className="label-icon"><i className="fas fa-briefcase"></i></span>
               Cargo/Função
             </label>
             <select
               id="role"
-              name="role"
               value={funcionario.role}
               onChange={(e) => handleChange('role', e.target.value)}
               required
               className="role-select"
             >
-              <option value="USER">👤 Funcionário (USER)</option>
-              <option value="ADMIN">👑 Administrador (ADMIN)</option>
+              <option value="USER">Funcionário (USER)</option>
+              <option value="ADMIN">Administrador (ADMIN)</option>
             </select>
             <small className="helper-text">
               • <strong>Funcionário:</strong> Pode visualizar produtos e dados básicos<br/>
@@ -253,12 +229,16 @@ const CadastroFuncionario = ({ onClose, onSuccess }) => {
 
           <div className="form-buttons">
             <button type="button" onClick={onClose} className="cancel-btn" disabled={isLoading}>
-              <span className="btn-icon">❌</span>
+              <span className="btn-icon"><i className="fas fa-times"></i></span>
               Cancelar
             </button>
             <button type="submit" disabled={isLoading} className="submit-btn">
               <span className="btn-icon">
-                {isLoading ? '⏳' : '✅'}
+                {isLoading ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  <i className="fas fa-save"></i>
+                )}
               </span>
               {isLoading ? 'Cadastrando...' : 'Cadastrar Funcionário'}
             </button>

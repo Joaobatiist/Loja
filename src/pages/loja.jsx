@@ -1,260 +1,32 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React from 'react';
 import '../style/loja.css';
-import apiService from '../utils/apiService';
 import LojasParceiras from '../componets/lojasParceiras/index.jsx';
-
-function Header({ onToggleCart, cartCount, isMenuOpen, onToggleMenu }) {
-  return (
-    <header className="header">
-      <div className="header-container">
-        <h1 className="logo">Limpa Tech</h1>
-        <div className="header-right">
-          <nav className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
-            <a href="#produtos" onClick={() => onToggleMenu(false)}>Produtos</a>
-            <a href="#sobre" onClick={() => onToggleMenu(false)}>Sobre Nós</a>
-            <a href="#contato" onClick={() => onToggleMenu(false)}>Contato</a>
-          </nav>
-          <a href="/dashboard" className="login-icon">
-            <i className="fa-solid fa-user"></i>
-          </a>
-          <button className="cart-icon" onClick={onToggleCart}>
-            <i className="fa-solid fa-cart-shopping"></i>
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </button>
-        </div>
-        <button className="menu-toggle" onClick={() => onToggleMenu(!isMenuOpen)}>
-          {isMenuOpen ? '×' : '☰'}
-        </button>
-      </div>
-    </header>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="footer">
-      <div className="container">
-        <p>&copy;  Limpa Tech. CNPJ:02.926.607.0001-22 Todos os direitos reservados. 2025</p>
-      </div>
-    </footer>
-  );
-}
-
-function Catalog({ cartItems, onRemoveItem, onUpdateQuantity, isOpen, onClose }) {
-  const numeroWhatsApp = "7599801234"; // seu número
-  const handleConsultPrice = () => {
-    if (cartItems.length === 0) {
-      alert("Seu carrinho está vazio. Adicione produtos para consultar o preço.");
-      return;
-    }
-    const productList = cartItems.map(item => `- ${item.name} (${item.brand}) - Quantidade: ${item.quantity}`).join('\n');
-    const message = encodeURIComponent(
-      `Olá! Gostaria do orçamento dos seguintes itens do catálogo:\n\n${productList}`
-    );
-    const whatsappUrl = `https://wa.me/${numeroWhatsApp}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  return (
-    <div className={`catalog-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
-      <aside className={`catalog-sidebar ${isOpen ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
-        <div className="catalog-header">
-          <h2>Carrinho</h2>
-          <button onClick={onClose} className="close-button">×</button>
-        </div>
-        {cartItems.length === 0 ? (
-          <p className="catalog-empty">Nenhum item adicionado ainda.</p>
-        ) : (
-          <>
-            <ul className="catalog-list">
-              {cartItems.map(item => (
-              <li key={item.id} className="catalog-item">
-    {/* Novo contêiner para agrupar o nome e os controles */}
-    <div className="product-details">
-        <span>{item.brand} - {item.name}</span>
-        <div className="quantity-controls"> 
-            <button onClick={() => onUpdateQuantity(item.id, item.quantity - 1)} className="quantity-button minus-button" disabled={item.quantity === 1}>-</button>
-            <input
-                type="number"
-                min="1"
-                value={item.quantity}
-                onChange={(e) => onUpdateQuantity(item.id, parseInt(e.target.value) || 1)}
-                className="quantity-input"
-            />
-            <button onClick={() => onUpdateQuantity(item.id, item.quantity + 1)} className="quantity-button plus-button">+</button>
-        </div>
-    </div>
-    <button onClick={() => onRemoveItem(item.id)} className="remove-button">×</button>
-</li>
-              ))}
-            </ul>
-            <button onClick={handleConsultPrice} className="whatsapp-button">
-              Consultar Preços via WhatsApp
-            </button>
-          </>
-        )}
-      </aside>
-    </div>
-  );
-}
-
-function ProductCard({ product, onAddToCart, isInCart }) {
-  return (
-    <div className="product-card">
-      <img src={product.image} alt={product.name} className="product-image" />
-      <p className="product-category">{product.category}</p>
-      <p className="product-brand">{product.brand}</p>
-      <h3 className="product-name">{product.name}</h3>
-      <button
-        onClick={() => onAddToCart(product)}
-        className={`add-to-cart-button ${isInCart ? 'added' : ''}`}
-        disabled={isInCart}
-      >
-        {isInCart ? 'Adicionado ✓' : 'Adicionar ao Carrinho'}
-      </button>
-    </div>
-  );
-}
-
-function ProductList({ products, onAddToCart, cartItems }) {
-  if (products.length === 0) {
-    return <p className="no-products-found">Nenhum produto encontrado com os filtros selecionados.</p>
-  }
-  
-  return (
-    <div className="product-list">
-      {products.map(product => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onAddToCart={onAddToCart}
-          isInCart={cartItems.some(item => item.id === product.id)}
-        />
-      ))}
-    </div>
-  );
-}
+import { useLojaController } from '../hooks/useLoja.js';
+import { Header, Footer, Catalog, ProductList } from '../componets/loja';
 
 // --- COMPONENTE PRINCIPAL ---
 function Loja() {
-  const [cartItems, setCartItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [produtos, setProdutos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 15;
-
-  // Carregar produtos da API
-  useEffect(() => {
-    const carregarProdutos = async () => {
-      try {
-        const response = await apiService.listarProdutosPublicos();
-        
-        if (response.success) {
-          // Converter formato do backend para formato esperado pelo frontend
-          const produtosFormatados = response.data.map(produto => ({
-            id: produto.id,
-            brand: produto.marca,
-            name: produto.nome,
-            category: produto.categoria,
-            image: produto.foto || 'https://via.placeholder.com/300x300.png?text=Sem+Foto',
-            quantity: 1 // quantidade inicial para o carrinho
-          }));
-          
-          setProdutos(produtosFormatados);
-        } else {
-          setProdutos([]);
-        }
-      } catch (error) {
-        setProdutos([]); // Array vazio em caso de erro
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    carregarProdutos();
-  }, []);
-
-  // Função para adicionar um item ao carrinho
-  const handleAddToCart = (productToAdd) => {
-    // Verifica se o item já está no carrinho
-    const existingItem = cartItems.find(item => item.id === productToAdd.id);
-    if (existingItem) {
-      // Se já existe, apenas incrementa a quantidade
-      setCartItems(prevItems => 
-        prevItems.map(item =>
-          item.id === productToAdd.id ? { ...item, quantity: item.quantity + 1 } : item
-        )
-      );
-    } else {
-      // Se é um novo item, adiciona-o com quantidade 1
-      setCartItems(prevItems => [...prevItems, { ...productToAdd, quantity: 1 }]);
-    }
-  };
-
-  // Função para remover um item do carrinho
-  const handleRemoveItem = (productId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-  
-  // Função para atualizar a quantidade de um item
-  const handleUpdateQuantity = (id, newQuantity) => {
-    // Garante que a quantidade seja um número válido e no mínimo 1
-    const safeQuantity = newQuantity > 0 ? newQuantity : 1; 
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id ? { ...item, quantity: safeQuantity } : item
-      )
-    );
-  };
-
-  const handleToggleMenu = (state) => {
-    if (state !== undefined) {
-      setIsMenuOpen(state);
-    } else {
-      setIsMenuOpen(!isMenuOpen);
-    }
-  };
-
-  const categories = useMemo(() => 
-    ['Todas', ...new Set(produtos.map(p => p.category))],
-    [produtos]
-  );
-
-  const filteredProducts = useMemo(() => {
-    return produtos.filter(product => {
-      const matchesCategory = selectedCategory === 'Todas' || product.category === selectedCategory;
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.brand.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
-  }, [searchTerm, selectedCategory, produtos]);
-
-  // Resetar página quando filtros mudarem
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory]);
-
-  // Calcular produtos da página atual
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    // Scroll para o topo da seção de produtos
-    if (typeof window !== 'undefined') {
-      const element = document.getElementById('produtos');
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
+  const {
+    cartItems,
+    setSearchTerm,
+    selectedCategory,
+    setSelectedCategory,
+    isCartOpen,
+    setIsCartOpen,
+    isMenuOpen,
+    loading,
+    currentPage,
+    productsPerPage,
+    categories,
+    filteredProducts,
+    currentProducts,
+    totalPages,
+    handleAddToCart,
+    handleRemoveItem,
+    handleUpdateQuantity,
+    handleToggleMenu,
+    handlePageChange
+  } = useLojaController();
 
   return (
     <div className="app loja-container">
@@ -338,7 +110,7 @@ function Loja() {
         <Catalog
           cartItems={cartItems}
           onRemoveItem={handleRemoveItem}
-          onUpdateQuantity={handleUpdateQuantity} // ✅ AQUI ESTÁ A CORREÇÃO!
+          onUpdateQuantity={handleUpdateQuantity}
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
         />

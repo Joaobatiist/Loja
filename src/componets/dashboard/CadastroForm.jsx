@@ -1,6 +1,6 @@
 import React, { useState, useCallback, memo, useEffect } from 'react';
 
-const CadastroForm = ({ novoProduto, setNovoProduto, onSubmit }) => {
+export const CadastroForm = ({ novoProduto, setNovoProduto, onSubmit }) => {
   const [fotoPreview, setFotoPreview] = useState(null);
 
   // Limpar preview quando o produto for resetado
