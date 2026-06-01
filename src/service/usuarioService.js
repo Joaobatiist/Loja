@@ -41,46 +41,30 @@ export const usuarioService = {
   },
 
  
-async criarUsuario(usuario) {
-    try {
-      const supabaseIsolado = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: { persistSession: false } 
-      });
+async  criarUsuario(novoUsuario) {
+  try {
+    // Troque 'cadastrar-usuario' pelo nome exato que você deu para a função no painel
+    const { data, error } = await supabase.functions.invoke('quick-responder', {
+      body: {
+        email: novoUsuario.email,
+        senha: novoUsuario.senha,
+        nome: novoUsuario.nome,
+        role: novoUsuario.role // 'USER' ou 'ADMIN'
+      }
+    });
 
-     
-      const { data: authData, error: authError } = await supabaseIsolado.auth.signUp({
-        email: usuario.email,
-        password: usuario.senha,
-      });
+    if (error) throw error;
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Erro ao criar credenciais de autenticação.");
+    return {
+      success: true,
+      usuario: data.usuario
+    };
 
-      // 3. Salva na tabela pública usando o 'supabase' original (onde você está logado)
-      const { data, error } = await supabase
-        .from('usuarios')
-        .insert([
-          {
-            id: authData.user.id, 
-            nome: usuario.nome,
-            email: usuario.email,
-            role: usuario.role || 'USER'
-          }
-        ])
-        .select('id, nome, email, role, created_at')
-        .single();
-        
-      if (error) throw error;
-
-      return {
-        success: true,
-        usuario: data
-      };
-    } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      throw error;
-    }
-  },
+  } catch (error) {
+    console.error("Erro ao chamar a Edge Function:", error);
+    throw error;
+  }
+},
 
   // Login para usuários já existentes
   async login(email, senha) {
